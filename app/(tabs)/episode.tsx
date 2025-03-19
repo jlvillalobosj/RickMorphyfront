@@ -35,14 +35,14 @@ export default function App() {
         {/* 🔹 Subtítulo */}
         <Subtitle>Episodios</Subtitle>
         <GetEpisode onDataReceived={(data) => setEpisodes({ ...data })} page={page} />
-        <ScrollView>
-          <TableContainer>
             <Header>
               <HeaderItem>Episodio</HeaderItem>
               <HeaderItem>Nombre</HeaderItem>
               <HeaderItem>Fecha al aire</HeaderItem>
               <HeaderItem>Fecha de creación</HeaderItem>
             </Header>
+        <ScrollView>
+          <TableContainer>
 
             <TableBody>
               {episodes.results.map((episode, index) => {
@@ -84,20 +84,19 @@ export default function App() {
 // 🎨 Estilos con styled-components
 const TableContainer = styled.View`
   width: 100%;
-  border-collapse: collapse;
+  flex: 1;
 `;
 
 const Header = styled.View`
   flex-direction: row;
   background-color:rgb(52, 146, 235);
   padding: 10px;
-  justify-content: space-between;
 `;
 
 const HeaderItem = styled.Text`
   font-weight: bold;
   color: #333;
-  width: 25%;
+  flex: 1;
   text-align: center;
 `;
 
@@ -111,13 +110,12 @@ const Row = styled.View`
   border-bottom-width: 1px;
   border-bottom-color: #ddd;
   padding: 8px 0;
-  justify-content: space-between;
 `;
 
 const TableItem = styled.Text`
   color: #666;
   text-align: center;
-  width: 25%;
+  flex: 1;
 `;
 
 const PaginationContainer = styled.View`
@@ -146,7 +144,7 @@ const Container = styled.View`
   width: 100%;
   flex: 1;
   background-color: #f5f5f5;
-  align-items: center;
+  align-items: stretch;
   justify-content: center;
   padding: 20px;
 `;

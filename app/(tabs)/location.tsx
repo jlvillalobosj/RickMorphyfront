@@ -40,15 +40,15 @@ export default function App() {
         {/* 🔹 Subtítulo */}
         <Subtitle>Ubicaciones</Subtitle>
         <GetLocation onDataReceived={(data) => setLocation({ ...data })} page={page} />
-
-        <ScrollView>
-          <TableContainer>
             <Header>
               <HeaderItem>Nombre</HeaderItem>
               <HeaderItem>Tipo</HeaderItem>
               <HeaderItem>Dimensión</HeaderItem>
               <HeaderItem>Fecha de creación</HeaderItem>
             </Header>
+
+        <ScrollView>
+          <TableContainer>
 
             <TableBody>
               {location.results.map((episode, index) => {
@@ -152,7 +152,7 @@ const Container = styled.View`
   width: 100%;
   flex: 1;
   background-color: #f5f5f5;
-  align-items: center;
+  align-items: stretch;
   justify-content: center;
   padding: 20px;
 `;
