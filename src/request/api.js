@@ -32,3 +32,14 @@ export const getEpisodes = async (page = 1) => {
     return [];
   }
 };
+
+export const fetchCharacters = async (name) => {
+  try {
+    const response = await axios.get(`${API_URL}/character/?name=${name}`);
+    return response.data; // Devuelve los personajes filtrados por nombre
+  } catch (error) {
+    console.error("Error fetching filtered characters:", error);
+    return { info: {}, results: [] }; // Devuelve estructura vacía en caso de error
+  }
+};
+

@@ -33,7 +33,14 @@ export default function App() {
   return (
     <Provider>
       <Container>
+  
+        {/* 🔹 Título principal */}
+        <Title>Rick and Morty</Title>
+
+        {/* 🔹 Subtítulo */}
+        <Subtitle>Ubicaciones</Subtitle>
         <GetLocation onDataReceived={(data) => setLocation({ ...data })} page={page} />
+
         <ScrollView>
           <TableContainer>
             <Header>
@@ -148,4 +155,20 @@ const Container = styled.View`
   align-items: center;
   justify-content: center;
   padding: 20px;
+`;
+
+const Title = styled.Text`
+  font-size: 32px;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 10px;
+  color: #2c3e50;
+`;
+
+const Subtitle = styled.Text`
+  font-size: 22px;
+  font-weight: bold;
+  margin-bottom: 10px;
+  text-align: center;
+  color: #34495e;
 `;
