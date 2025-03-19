@@ -12,10 +12,10 @@ export const getCharacters = async (page = 1) => {
   }
 };
 
-export const getLocations = async () => {
+export const getLocations = async (page = 1) => {
   try {
-    const response = await axios.get(`${API_URL}/location`);
-    return response.data.results; // Devuelve la lista de ubicaciones
+    const response = await axios.get(`${API_URL}/location?page=${page}`);
+    return response.data; // Devuelve la lista de ubicaciones
   } catch (error) {
     console.error('Error al obtener las ubicaciones:', error);
     return [];

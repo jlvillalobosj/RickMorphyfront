@@ -1,26 +1,31 @@
 import React, { useState } from 'react';
 import { ScrollView, useWindowDimensions, TouchableOpacity, View, Text } from 'react-native';
 import styled from 'styled-components/native';
-import { GetEpisode } from '../../src/screen/main'; 
+import { GetLocation } from '../../src/screen/main'; 
 import { Provider } from 'react-native-paper';
 import { format, isValid, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 export default function App() {
-  const [episodes, setEpisodes] = useState({
+  const [location, setLocation] = useState({
     info: {
       count: 0,
       next: '',
       pages: 0,
       prev: '',
     },
-    results: [],
+    results: [
+      {
+        id: 0,
+        name: '',
+        type: '',
+        dimension: '',
+        created: '',
+      },],
   });
 
   const [page, setPage] = useState(1); // Estado para manejar la página
   const { width } = useWindowDimensions();
-  const itemSize = 380;
-  const numColumns = Math.max(1, Math.floor(width / itemSize));
 
   const nextPage = () => setPage((prev) => prev + 1);
   const prevPage = () => setPage((prev) => (prev > 1 ? prev - 1 : 1)); 
@@ -28,18 +33,18 @@ export default function App() {
   return (
     <Provider>
       <Container>
-        <GetEpisode onDataReceived={(data) => setEpisodes({ ...data })} page={page} />
+        <GetLocation onDataReceived={(data) => setLocation({ ...data })} page={page} />
         <ScrollView>
           <TableContainer>
             <Header>
-              <HeaderItem>Episodio</HeaderItem>
               <HeaderItem>Nombre</HeaderItem>
-              <HeaderItem>Fecha al aire</HeaderItem>
+              <HeaderItem>Tipo</HeaderItem>
+              <HeaderItem>Dimensión</HeaderItem>
               <HeaderItem>Fecha de creación</HeaderItem>
             </Header>
 
             <TableBody>
-              {episodes.results.map((episode, index) => {
+              {location.results.map((episode, index) => {
                 const createdDate = episode.created ? parseISO(episode.created) : null;
                 const formattedDate = createdDate && isValid(createdDate)
                   ? format(createdDate, "d 'de' MMMM 'de' yyyy, HH:mm", { locale: es })
@@ -47,9 +52,9 @@ export default function App() {
 
                 return (
                   <Row key={index}>
-                    <TableItem>{episode.episode}</TableItem>
                     <TableItem>{episode.name}</TableItem>
-                    <TableItem>{episode.air_date}</TableItem>
+                    <TableItem>{episode.type}</TableItem>
+                    <TableItem>{episode.dimension }</TableItem>
                     <TableItem>{formattedDate}</TableItem>
                   </Row>
                 );
@@ -64,7 +69,7 @@ export default function App() {
             <ArrowText>{'◀️'}</ArrowText>
           </ArrowButton>
 
-          <PageText>Página {page} de {episodes.info.pages}</PageText>
+          <PageText>Página {page} de {location.info.pages}</PageText>
 
           <ArrowButton onPress={nextPage}>
             <ArrowText>{'▶️'}</ArrowText>
@@ -83,7 +88,7 @@ const TableContainer = styled.View`
 
 const Header = styled.View`
   flex-direction: row;
-  background-color:rgb(52, 146, 235);
+  background-color:rgb(75, 233, 44);
   padding: 10px;
   justify-content: space-between;
 `;
