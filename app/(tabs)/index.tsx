@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ScrollView, FlatList, useWindowDimensions, TouchableOpacity, Modal, View, Text } from 'react-native';
 import styled from 'styled-components/native';
-import TestScreen from '../../src/screen/main'; 
+import {TestScreen} from '../../src/screen/main'; 
 import CharacterDetail from '../modal/characterDetail';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import {Provider ,Tooltip } from 'react-native-paper';

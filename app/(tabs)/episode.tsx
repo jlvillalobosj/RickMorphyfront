@@ -1,155 +1,117 @@
 import React, { useState } from 'react';
-import { ScrollView, FlatList, useWindowDimensions, TouchableOpacity, Modal, View, Text } from 'react-native';
+import { ScrollView, useWindowDimensions, TouchableOpacity, View, Text } from 'react-native';
 import styled from 'styled-components/native';
-import TestScreen from '../../src/screen/main'; 
-import CharacterDetail from '../modal/characterDetail';
-import Icon from 'react-native-vector-icons/FontAwesome';
-import {Provider ,Tooltip } from 'react-native-paper';
+import { GetEpisode } from '../../src/screen/main'; 
+import { Provider } from 'react-native-paper';
+import { format, isValid, parseISO } from 'date-fns';
+import { es } from 'date-fns/locale';
 
 export default function App() {
-  const [characters, setCharacters] = useState({
+  const [episodes, setEpisodes] = useState({
     info: {
       count: 0,
       next: '',
       pages: 0,
       prev: '',
     },
-    results: [
-      {
-        id: 0,
-        name: '',
-        status: '',
-        species: '',
-        gender: '',
-        image: '',
-      },
-    ],
+    results: [],
   });
 
-  //console.log(characters.results);
-
   const [page, setPage] = useState(1); // Estado para manejar la página
+  const { width } = useWindowDimensions();
+  const itemSize = 380;
+  const numColumns = Math.max(1, Math.floor(width / itemSize));
 
-  const { width } = useWindowDimensions();  // Obtiene el ancho de la pantalla
-  const itemSize = 380;  // 🔹 Tamaño fijo para cada cuadrado
-  const numColumns = Math.max(1, Math.floor(width / itemSize)); //Calcula cuántas columnas caben
-
-  const [selectedCharacter, setSelectedCharacter] = useState(null); //  Estado para el personaje seleccionado
-  const [modalVisible, setModalVisible] = useState(false); //  Estado para mostrar la modal
-
-  const openModal = (character) => {
-    setSelectedCharacter(character);
-    setModalVisible(true);
-  };
-
-  const closeModal = () => {
-    setModalVisible(false);
-  };
-
-  // Funciones para cambiar de página
   const nextPage = () => setPage((prev) => prev + 1);
   const prevPage = () => setPage((prev) => (prev > 1 ? prev - 1 : 1)); 
 
   return (
     <Provider>
       <Container>
-      <TestScreen onDataReceived={(data) => setCharacters({ ...data })}  page={page} />
+        <GetEpisode onDataReceived={(data) => setEpisodes({ ...data })} page={page} />
+        <ScrollView>
+          <TableContainer>
+            <Header>
+              <HeaderItem>Episodio</HeaderItem>
+              <HeaderItem>Nombre</HeaderItem>
+              <HeaderItem>Fecha al aire</HeaderItem>
+              <HeaderItem>Fecha de creación</HeaderItem>
+            </Header>
 
-      <ScrollView>
-        <FlatList
-          key={numColumns}
-          data={characters.results}
-          numColumns={numColumns} // 🔹 Organiza los elementos en 5 columnas
-          keyExtractor={(item) => item.id.toString()}
-          renderItem={({ item }) => (
-            <Card numColumns={numColumns}>
+            <TableBody>
+              {episodes.results.map((episode, index) => {
+                const createdDate = episode.created ? parseISO(episode.created) : null;
+                const formattedDate = createdDate && isValid(createdDate)
+                  ? format(createdDate, "d 'de' MMMM 'de' yyyy, HH:mm", { locale: es })
+                  : 'Fecha inválida';
 
-              <EyeButton>
-                <Tooltip title="Vista de detalle" enterTouchDelay={200} leaveTouchDelay={100}>
-                  <TouchableOpacity onPress={() => openModal(item)}>
-                    <Icon name="eye" size={20} color="#555" />
-                  </TouchableOpacity>
-                </Tooltip>
-              </EyeButton>
+                return (
+                  <Row key={index}>
+                    <TableItem>{episode.episode}</TableItem>
+                    <TableItem>{episode.name}</TableItem>
+                    <TableItem>{episode.air_date}</TableItem>
+                    <TableItem>{formattedDate}</TableItem>
+                  </Row>
+                );
+              })}
+            </TableBody>
+          </TableContainer>
+        </ScrollView>
 
-              <CharacterImage source={{ uri: item.image }} />
-              <CharacterInfo>
-                <CharacterName>{item.name}</CharacterName>
-                <CharacterText>Status: {item.status}</CharacterText>
-                <CharacterText>Species: {item.species}</CharacterText>
-                <CharacterText>Gender: {item.gender}</CharacterText>
-              </CharacterInfo>
-            </Card>
-          )}
-        />
-      </ScrollView>
-
-      {/* 🔹 Controles de navegación */}
+        {/* Controles de navegación */}
         <PaginationContainer>
           <ArrowButton onPress={prevPage} disabled={page === 1}>
             <ArrowText>{'◀️'}</ArrowText>
           </ArrowButton>
 
-          <PageText>Página {page} de {characters.info.pages}</PageText>
+          <PageText>Página {page} de {episodes.info.pages}</PageText>
 
           <ArrowButton onPress={nextPage}>
             <ArrowText>{'▶️'}</ArrowText>
           </ArrowButton>
         </PaginationContainer>
-
-
-        {/* 🔹 Modal para mostrar detalles */}
-        <Modal visible={modalVisible} transparent animationType="slide">
-          <CharacterDetail character={selectedCharacter} onClose={closeModal} />
-        </Modal>
       </Container>
-
     </Provider>
   );
 }
 
 // 🎨 Estilos con styled-components
-const Container = styled.View`
-  flex: 1;
-  background-color: #f4f4f4;
-  padding: 20px;
+const TableContainer = styled.View`
+  width: 100%;
+  border-collapse: collapse;
 `;
 
-const Card = styled.View`
-  background-color: white;
-  border-radius: 15px;
-  padding: 15px;
-  margin-bottom: 15px;
-  margin-horizontal: 5px;
-  width: ${({ numColumns }) => `calc(${100 / numColumns}% - 10px)`};
+const Header = styled.View`
   flex-direction: row;
-  align-items: center;
-  shadow-color: black;
-  shadow-opacity: 0.1;
-  shadow-radius: 5px;
-  elevation: 5;
+  background-color:rgb(52, 146, 235);
+  padding: 10px;
+  justify-content: space-between;
 `;
 
-const CharacterImage = styled.Image`
-  width: 80px;
-  height: 80px;
-  border-radius: 10px;
-`;
-
-const CharacterInfo = styled.View`
-  margin-left: 15px;
-`;
-
-const CharacterName = styled.Text`
-  font-size: 18px;
+const HeaderItem = styled.Text`
   font-weight: bold;
   color: #333;
+  width: 25%;
+  text-align: center;
 `;
 
-const CharacterText = styled.Text`
-  font-size: 14px;
+const TableBody = styled.View`
+  background-color: white;
+  padding: 10px;
+`;
+
+const Row = styled.View`
+  flex-direction: row;
+  border-bottom-width: 1px;
+  border-bottom-color: #ddd;
+  padding: 8px 0;
+  justify-content: space-between;
+`;
+
+const TableItem = styled.Text`
   color: #666;
-  margin-top: 2px;
+  text-align: center;
+  width: 25%;
 `;
 
 const PaginationContainer = styled.View`
@@ -174,9 +136,11 @@ const PageText = styled.Text`
   margin-horizontal: 15px;
 `;
 
-const EyeButton = styled.TouchableOpacity`
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  padding: 5px;
+const Container = styled.View`
+  width: 100%;
+  flex: 1;
+  background-color: #f5f5f5;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
 `;

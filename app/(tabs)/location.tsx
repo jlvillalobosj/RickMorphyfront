@@ -1,109 +1,146 @@
-import { StyleSheet, Image, Platform } from 'react-native';
+import React, { useState } from 'react';
+import { ScrollView, useWindowDimensions, TouchableOpacity, View, Text } from 'react-native';
+import styled from 'styled-components/native';
+import { GetEpisode } from '../../src/screen/main'; 
+import { Provider } from 'react-native-paper';
+import { format, isValid, parseISO } from 'date-fns';
+import { es } from 'date-fns/locale';
 
-import { Collapsible } from '@/components/Collapsible';
-import { ExternalLink } from '@/components/ExternalLink';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
-import { IconSymbol } from '@/components/ui/IconSymbol';
+export default function App() {
+  const [episodes, setEpisodes] = useState({
+    info: {
+      count: 0,
+      next: '',
+      pages: 0,
+      prev: '',
+    },
+    results: [],
+  });
 
-export default function TabTwoScreen() {
+  const [page, setPage] = useState(1); // Estado para manejar la página
+  const { width } = useWindowDimensions();
+  const itemSize = 380;
+  const numColumns = Math.max(1, Math.floor(width / itemSize));
+
+  const nextPage = () => setPage((prev) => prev + 1);
+  const prevPage = () => setPage((prev) => (prev > 1 ? prev - 1 : 1)); 
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
-      headerImage={
-        <IconSymbol
-          size={310}
-          color="#808080"
-          name="chevron.left.forwardslash.chevron.right"
-          style={styles.headerImage}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Explore</ThemedText>
-      </ThemedView>
-      <ThemedText>This app includes example code to help you get started.</ThemedText>
-      <Collapsible title="File-based routing">
-        <ThemedText>
-          This app has two screens:{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/explore.tsx</ThemedText>
-        </ThemedText>
-        <ThemedText>
-          The layout file in <ThemedText type="defaultSemiBold">app/(tabs)/_layout.tsx</ThemedText>{' '}
-          sets up the tab navigator.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/router/introduction">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Android, iOS, and web support">
-        <ThemedText>
-          You can open this project on Android, iOS, and the web. To open the web version, press{' '}
-          <ThemedText type="defaultSemiBold">w</ThemedText> in the terminal running this project.
-        </ThemedText>
-      </Collapsible>
-      <Collapsible title="Images">
-        <ThemedText>
-          For static images, you can use the <ThemedText type="defaultSemiBold">@2x</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">@3x</ThemedText> suffixes to provide files for
-          different screen densities
-        </ThemedText>
-        <Image source={require('@/assets/images/react-logo.png')} style={{ alignSelf: 'center' }} />
-        <ExternalLink href="https://reactnative.dev/docs/images">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Custom fonts">
-        <ThemedText>
-          Open <ThemedText type="defaultSemiBold">app/_layout.tsx</ThemedText> to see how to load{' '}
-          <ThemedText style={{ fontFamily: 'SpaceMono' }}>
-            custom fonts such as this one.
-          </ThemedText>
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/versions/latest/sdk/font">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Light and dark mode components">
-        <ThemedText>
-          This template has light and dark mode support. The{' '}
-          <ThemedText type="defaultSemiBold">useColorScheme()</ThemedText> hook lets you inspect
-          what the user's current color scheme is, and so you can adjust UI colors accordingly.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/develop/user-interface/color-themes/">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Animations">
-        <ThemedText>
-          This template includes an example of an animated component. The{' '}
-          <ThemedText type="defaultSemiBold">components/HelloWave.tsx</ThemedText> component uses
-          the powerful <ThemedText type="defaultSemiBold">react-native-reanimated</ThemedText>{' '}
-          library to create a waving hand animation.
-        </ThemedText>
-        {Platform.select({
-          ios: (
-            <ThemedText>
-              The <ThemedText type="defaultSemiBold">components/ParallaxScrollView.tsx</ThemedText>{' '}
-              component provides a parallax effect for the header image.
-            </ThemedText>
-          ),
-        })}
-      </Collapsible>
-    </ParallaxScrollView>
+    <Provider>
+      <Container>
+        <GetEpisode onDataReceived={(data) => setEpisodes({ ...data })} page={page} />
+        <ScrollView>
+          <TableContainer>
+            <Header>
+              <HeaderItem>Episodio</HeaderItem>
+              <HeaderItem>Nombre</HeaderItem>
+              <HeaderItem>Fecha al aire</HeaderItem>
+              <HeaderItem>Fecha de creación</HeaderItem>
+            </Header>
+
+            <TableBody>
+              {episodes.results.map((episode, index) => {
+                const createdDate = episode.created ? parseISO(episode.created) : null;
+                const formattedDate = createdDate && isValid(createdDate)
+                  ? format(createdDate, "d 'de' MMMM 'de' yyyy, HH:mm", { locale: es })
+                  : 'Fecha inválida';
+
+                return (
+                  <Row key={index}>
+                    <TableItem>{episode.episode}</TableItem>
+                    <TableItem>{episode.name}</TableItem>
+                    <TableItem>{episode.air_date}</TableItem>
+                    <TableItem>{formattedDate}</TableItem>
+                  </Row>
+                );
+              })}
+            </TableBody>
+          </TableContainer>
+        </ScrollView>
+
+        {/* Controles de navegación */}
+        <PaginationContainer>
+          <ArrowButton onPress={prevPage} disabled={page === 1}>
+            <ArrowText>{'◀️'}</ArrowText>
+          </ArrowButton>
+
+          <PageText>Página {page} de {episodes.info.pages}</PageText>
+
+          <ArrowButton onPress={nextPage}>
+            <ArrowText>{'▶️'}</ArrowText>
+          </ArrowButton>
+        </PaginationContainer>
+      </Container>
+    </Provider>
   );
 }
 
-const styles = StyleSheet.create({
-  headerImage: {
-    color: '#808080',
-    bottom: -90,
-    left: -35,
-    position: 'absolute',
-  },
-  titleContainer: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-});
+// 🎨 Estilos con styled-components
+const TableContainer = styled.View`
+  width: 100%;
+  border-collapse: collapse;
+`;
+
+const Header = styled.View`
+  flex-direction: row;
+  background-color:rgb(52, 146, 235);
+  padding: 10px;
+  justify-content: space-between;
+`;
+
+const HeaderItem = styled.Text`
+  font-weight: bold;
+  color: #333;
+  width: 25%;
+  text-align: center;
+`;
+
+const TableBody = styled.View`
+  background-color: white;
+  padding: 10px;
+`;
+
+const Row = styled.View`
+  flex-direction: row;
+  border-bottom-width: 1px;
+  border-bottom-color: #ddd;
+  padding: 8px 0;
+  justify-content: space-between;
+`;
+
+const TableItem = styled.Text`
+  color: #666;
+  text-align: center;
+  width: 25%;
+`;
+
+const PaginationContainer = styled.View`
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+`;
+
+const ArrowButton = styled.TouchableOpacity`
+  padding: 10px;
+  margin: 10px;
+`;
+
+const ArrowText = styled.Text`
+  font-size: 24px;
+`;
+
+const PageText = styled.Text`
+  font-size: 18px;
+  font-weight: bold;
+  margin-horizontal: 15px;
+`;
+
+const Container = styled.View`
+  width: 100%;
+  flex: 1;
+  background-color: #f5f5f5;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+`;

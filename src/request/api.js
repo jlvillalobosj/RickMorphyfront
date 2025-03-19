@@ -22,10 +22,11 @@ export const getLocations = async () => {
   }
 };
 
-export const getEpisodes = async () => {
+export const getEpisodes = async (page = 1) => {
   try {
-    const response = await axios.get(`${API_URL}/episode`);
-    return response.data.results; // Devuelve la lista de episodio
+    const response = await axios.get(`${API_URL}/episode?page=${page}`);
+    console.log(response);
+    return response.data; // Devuelve la lista de episodio
   } catch (error) {
     console.error('Error al obtener los episodios:', error);
     return [];
